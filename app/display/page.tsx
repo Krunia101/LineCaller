@@ -45,7 +45,7 @@ export default function DisplayPage() {
       setData(payload);
 
       // Gunakan jeda titik (.) agar intonasi suara lebih manusiawi
-      const teksPanggilan = `Nomor antrian. ${payload.nomor}. Atas nama. ${payload.nama}. Silakan ke konter layanan.`;
+      const teksPanggilan = `Nomor antrian. ${payload.nomor}. Silakan ke konter pelayanan.`;
       
       playVoice(teksPanggilan);
     });
