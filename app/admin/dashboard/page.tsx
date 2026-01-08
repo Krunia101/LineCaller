@@ -1,10 +1,10 @@
 import { Suspense } from "react";
-import DisplayClient from "./displayCLI";
+import AdminClient from "./adminCLI";
 
 export default function Page() {
   return (
     <Suspense fallback={null}>
-      <DisplayClient />
+      <AdminClient />
     </Suspense>
   );
 }

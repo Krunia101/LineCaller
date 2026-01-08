@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { app, BrowserWindow } = require("electron");
+const path = require("path");
 
 let adminWindow;
 let displayWindow;
 
 function createWindows() {
-  // WINDOW DISPLAY
   displayWindow = new BrowserWindow({
     width: 900,
     height: 600,
@@ -13,10 +13,8 @@ function createWindows() {
   });
 
   displayWindow.loadURL("http://localhost:3000/display");
-
   displayWindow.maximize();
 
-  // WINDOW ADMIN
   adminWindow = new BrowserWindow({
     width: 500,
     height: 600,
@@ -26,4 +24,41 @@ function createWindows() {
   adminWindow.loadURL("http://localhost:3000/admin");
 }
 
-app.whenReady().then(createWindows);
+async function startProdServerAndCreate() {
+  if (app.isPackaged) {
+    console.log('Packaged mode: starting Next production server...');
+    const next = require("next");
+    const { createServer } = require("http");
+    const { parse } = require("url");
+
+    const nextApp = next({ dev: false, dir: path.join(__dirname, "..") });
+    await nextApp.prepare();
+    const handle = nextApp.getRequestHandler();
+
+    const server = createServer((req, res) => {
+      const parsedUrl = parse(req.url, true);
+      handle(req, res, parsedUrl);
+    });
+
+    server.listen(3000, () => {
+      console.log('Next server listening on http://localhost:3000');
+      createWindows();
+    });
+  } else {
+    console.log('Dev mode: creating windows using existing dev server');
+    createWindows();
+  }
+}
+
+app.whenReady().then(startProdServerAndCreate);
+
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") app.quit();
+});
+
+// Open DevTools when DEBUG_ELECTRON=true for packaged apps
+if (process.env.DEBUG_ELECTRON === 'true') {
+  app.on('browser-window-created', (e, window) => {
+    window.webContents.openDevTools();
+  });
+}
