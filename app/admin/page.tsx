@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 export default function PilihKonterPage() {
   const router = useRouter();
 
-  const pilihKonter = (konter: number) => {
-    router.push(`/admin/dashboard?konter=${konter}`);
-  };
+const pilihKonter = (konter: number) => {
+  localStorage.setItem("konter", konter.toString());
+  router.push("/admin/dashboard");
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] font-sans">
@@ -17,7 +19,7 @@ export default function PilihKonterPage() {
           Pilih Konter
         </h1>
         <p className="text-sm text-[#64748B] mb-10">
-          Silakan pilih konter sebelum masuk sistem antrian
+          Silakan pilih konter sebelum amasuk sistem antrian
         </p>
 
         <div className="space-y-6">

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
+const http = require("http");
 
 let adminWindow;
 let displayWindow;
@@ -11,10 +12,11 @@ function createWindows() {
     height: 600,
     autoHideMenuBar: true,
   });
-
+  
+  
   displayWindow.loadURL("http://localhost:3000/display");
   displayWindow.maximize();
-
+  
   adminWindow = new BrowserWindow({
     width: 500,
     height: 600,
@@ -22,6 +24,13 @@ function createWindows() {
   });
 
   adminWindow.loadURL("http://localhost:3000/admin");
+}
+function warmUpSocket() {
+http.get("http://localhost:3000/api/socket", () => {
+  console.log("✅ Socket API warmed up");
+}).on("error", (err) => {
+  console.error("❌ Warmup socket gagal:", err.message);
+});
 }
 
 async function startProdServerAndCreate() {
@@ -42,6 +51,7 @@ async function startProdServerAndCreate() {
 
     server.listen(3000, () => {
       console.log('Next server listening on http://localhost:3000');
+      warmUpSocket();
       createWindows();
     });
   } else {

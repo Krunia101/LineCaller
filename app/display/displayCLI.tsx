@@ -2,18 +2,21 @@
 
 import { socket } from "@/lib/socket";
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 
 type Patient = {
-  nama: string;
-  nomor: number;
-  konter?: number;
+  nomor: string;
+  nama?: string;
+  konter?: string;
 };
 
 export default function DisplayClient() {
-  const searchParams = useSearchParams();
   const [data, setData] = useState<Patient | null>(null);
-  const konter = searchParams?.get("konter") || "1";
+
+  // ===== AMBIL KONTER (AMAN BUILD & EXE)
+  const konter =
+    typeof window !== "undefined"
+      ? new URLSearchParams(window.location.search).get("konter") || "1"
+      : "1";
 
   const playVoice = async (text: string) => {
     try {
@@ -28,20 +31,21 @@ export default function DisplayClient() {
       const audio = new Audio(url);
       await audio.play();
       audio.onended = () => URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error("TTS error:", err);
     }
   };
 
   useEffect(() => {
+    // penting: bangunin socket server
     fetch("/api/socket");
 
     socket.on("patient-called", (payload: Patient) => {
       setData(payload);
 
       const teks = payload.konter
-        ? `Nomor antrian. ${payload.nomor}. Silakan ke konter ${payload.konter}.`
-        : `Nomor antrian. ${payload.nomor}. Silakan ke konter pelayanan.`;
+        ? `Nomor antrian ${payload.nomor}. Silakan ke konter ${payload.konter}.`
+        : `Nomor antrian ${payload.nomor}. Silakan ke konter pelayanan ${payload.konter}`;
 
       playVoice(teks);
     });
@@ -64,10 +68,10 @@ export default function DisplayClient() {
               {data.nomor}
             </div>
 
-            <div className="text-3xl mt-4">
+            <div className="text-3xl mt-6">
               Silakan ke{" "}
               <span className="font-bold text-teal-600">
-                Konter {konter}
+                Konter {data.konter ?? konter}
               </span>
             </div>
           </>
