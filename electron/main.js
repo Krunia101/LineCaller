@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const { app, BrowserWindow } = require("electron");
+const { app, BrowserWindow, ipcMain } = require("electron");
 const path = require("path");
 const http = require("http");
 
@@ -21,6 +21,25 @@ function createWindows() {
     width: 500,
     height: 600,
     autoHideMenuBar: false,
+    webPreferences: {
+      // Enable ipcRenderer in the renderer process for silent printing.
+      // For production consider using a preload script to expose a safe API.
+      nodeIntegration: true,
+      contextIsolation: false,
+    },
+  });
+
+  // Handle silent print requests from renderer
+  ipcMain.on("silent-print", (event) => {
+    const win = BrowserWindow.fromWebContents(event.sender) || adminWindow;
+    if (!win) return;
+    win.webContents.print({ silent: true, printBackground: true }, (success, failureReason) => {
+      try {
+        event.reply("silent-print-done", { success, failureReason });
+      } catch (e) {
+        // ignore
+      }
+    });
   });
 
   adminWindow.loadURL("http://localhost:3000/admin");

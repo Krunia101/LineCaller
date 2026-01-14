@@ -1,5 +1,14 @@
 {
-  "date": "2026-01-09",
-  "queue": [],
-  "counter": 1
+  "date": "2026-01-13",
+  "queue": [
+    {
+      "nomor": "A-001",
+      "nama": ""
+    },
+    {
+      "nomor": "A-002",
+      "nama": ""
+    }
+  ],
+  "counter": 3
 }
