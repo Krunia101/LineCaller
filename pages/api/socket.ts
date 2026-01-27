@@ -111,9 +111,9 @@ export default function handler(
       });
 
       // tambah antrian
-      socket.on("add-queue", ({ nama }) => {
+      socket.on("add-queue", () => {
         const nomor = generateNumber();
-        const item = { nomor, nama };
+        const item = { nomor};
 
         queue.push(item);
         savePersistentData(queue, counter);
@@ -152,5 +152,5 @@ export default function handler(
     res.socket.server.io = io;
   }
 
-  res.end();
+    res.status(200).json({ success: true, message: "Socket server ready" });
 }

@@ -43,6 +43,7 @@ function createWindows() {
   });
 
   adminWindow.loadURL("http://localhost:3000/admin");
+  adminWindow.loadURL("http://localhost:3000/admin");
 }
 function warmUpSocket() {
 http.get("http://localhost:3000/api/socket", () => {

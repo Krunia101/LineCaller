@@ -1,16 +1,15 @@
 export type QueueItem = {
-  name: string;
   number: string;
 };
 
 let currentQueue: QueueItem | null = null;
 let counter = 1;
 
-export function generateQueue(name: string) {
+export function generateQueue() {
   const number = `A-${String(counter).padStart(3, "0")}`;
   counter++;
 
-  currentQueue = { name, number };
+  currentQueue = { number };
   return currentQueue;
 }
 
