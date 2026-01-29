@@ -1,12 +1,13 @@
 "use client";
 
 import { socket } from "@/lib/socket";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 type Patient = {
   nomor: string;
   nama?: string;
   konter?: string;
+  isRecall?: boolean;
 };
 
 export default function DisplayClient() {
@@ -18,42 +19,71 @@ export default function DisplayClient() {
       ? new URLSearchParams(window.location.search).get("konter") || "1"
       : "1";
 
-  const playVoice = async (text: string) => {
+  const playVoice = useCallback(async (text: string) => {
     try {
+      console.log("🎤 playVoice called with text:", text);
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
       });
 
+      if (!res.ok) {
+        console.error(`❌ TTS fetch error: ${res.status} ${res.statusText}`);
+        return;
+      }
+
       const blob = await res.blob();
+      console.log(`📁 Received blob: ${blob.size} bytes`);
+      
       const url = URL.createObjectURL(blob);
       const audio = new Audio(url);
+      
+      audio.onplay = () => console.log("🔊 Audio playing");
+      audio.onended = () => {
+        console.log("✅ Audio ended");
+        URL.revokeObjectURL(url);
+      };
+      audio.onerror = (e) => console.error("❌ Audio error:", e);
+      
       await audio.play();
-      audio.onended = () => URL.revokeObjectURL(url);
     } catch (err) {
-      console.error("TTS error:", err);
+      console.error("❌ playVoice error:", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // penting: bangunin socket server
-    fetch("/api/socket");
+    fetch("/api/socket").then(() => console.log("✅ Socket server initialized"));
 
-    socket.on("patient-called", (payload: Patient) => {
+    const handlePatientCalled = (payload: Patient) => {
+      console.log("📢 Patient called event received:", payload);
       setData(payload);
 
-      const teks = payload.konter
-        ? `Nomor antrian ${payload.nomor}. Silakan ke konter ${payload.konter}.`
-        : `Nomor antrian ${payload.nomor}. Silakan ke konter pelayanan ${payload.konter}`;
+      // Buat text berbeda untuk panggilan pertama vs panggilan ulang
+      let teks: string;
+      if (payload.isRecall) {
+        // Panggilan ulang
+        teks = payload.konter
+          ? `Panggilan ulang. Untuk Nomor antrian ${payload.nomor}. Silakan ke Loket ${payload.konter}.`
+          : `Panggilan ulang. Untuk Nomor antrian ${payload.nomor}. Silakan ke Loket pelayanan ${payload.konter}`;
+      } else {
+        // Panggilan pertama
+        teks = payload.konter
+          ? `Nomor antrian ${payload.nomor}. Silakan ke Loket ${payload.konter}.`
+          : `Nomor antrian ${payload.nomor}. Silakan ke Loket pelayanan ${payload.konter}`;
+      }
 
+      console.log("🔊 Playing voice:", teks);
       playVoice(teks);
-    });
+    };
+
+    socket.on("patient-called", handlePatientCalled);
 
     return () => {
-      socket.off("patient-called");
+      socket.off("patient-called", handlePatientCalled);
     };
-  }, []);
+  }, [playVoice]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 to-teal-100 flex items-center justify-center px-6">
@@ -71,7 +101,7 @@ export default function DisplayClient() {
             <div className="text-3xl mt-6">
               Silakan ke{" "}
               <span className="font-bold text-teal-600">
-                Konter {data.konter ?? konter}
+                Loket {data.konter ?? konter}
               </span>
             </div>
           </>

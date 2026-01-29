@@ -18,6 +18,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
 }
 
 @media print {
@@ -40,11 +41,13 @@ body {
     top: 0;
     width: 58mm;
     padding: 6px;
+    text-align: center;
   }
 
   @page {
     size: 58mm auto;
-    margin: 0;
+    margin: 20;
+    text-align: center;
   }
 }
 

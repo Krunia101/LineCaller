@@ -24,17 +24,17 @@ const pilihKonter = (konter: number) => {
 
         <div className="space-y-6">
           <button
-            onClick={() => pilihKonter(1)}
+            onClick={() => pilihKonter(5)}
             className="w-full py-6 rounded-2xl bg-gradient-to-b from-[#0EA5E9] to-[#0284C7] text-white font-black tracking-[0.2em] shadow-lg active:scale-95"
           >
-            KONTER 1
+            Loket 5
           </button>
 
           <button
-            onClick={() => pilihKonter(2)}
+            onClick={() => pilihKonter(6)}
             className="w-full py-6 rounded-2xl bg-gradient-to-b from-[#10B981] to-[#059669] text-white font-black tracking-[0.2em] shadow-lg active:scale-95"
           >
-            KONTER 2
+            Loket 6
           </button>
         </div>
 
